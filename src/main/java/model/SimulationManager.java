@@ -86,6 +86,7 @@ public class SimulationManager implements Runnable {
             return;
         }
         int avgS=averageService();
+        int peak= peakHour();
         while (currentTime < timeLimit) {
             removeGeneratedTasks(currentTime,avg);
             updateGui();
@@ -98,11 +99,15 @@ public class SimulationManager implements Runnable {
         }
         String printAverage= "Average waiting time: " + max/getNrClient();
         String printAverageS= "\nAverage service time: " + avgS/getNrClient();
+        String printPeak= "\nPeak hour: " + peak/getNrClient();
         writeFile(file,printAverage);
         writeFile(file,printAverageS);
+        writeFile(file, printPeak);
         closeFile(file);
         setOpenFalse();
     }
+
+
     public int getNrClient(){
         int sum=0;
         if(allClosed()){
@@ -111,7 +116,7 @@ public class SimulationManager implements Runnable {
             for(int i=0; i<scheduler.getServers().size(); i++){
                sum+=scheduler.getServers().get(i).getTasks().size();
             }
-            return sum;
+            return numberOfClients- sum;
         }
     }
     public int averageService(){
@@ -120,6 +125,13 @@ public class SimulationManager implements Runnable {
         sum+=generatedTasks.get(i).getProcessingTime();
     }
     return sum;
+    }
+    public int peakHour(){
+        int sum=0;
+        for(int i=0; i<generatedTasks.size(); i++){
+            sum+=generatedTasks.get(i).getArrivalTime();
+        }
+        return sum;
     }
     public boolean allClosed() {
         int j = 0;
@@ -180,7 +192,7 @@ public class SimulationManager implements Runnable {
 
     public void putThreadToSleep() {
         try {
-            Thread.sleep(1500);
+            Thread.sleep(1000);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -46,7 +46,7 @@ public class Server implements Runnable {
 
     public void putThreadToSleep() {
         try {
-            sleep(1500);
+            sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
