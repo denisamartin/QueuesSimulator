@@ -85,6 +85,7 @@ public class SimulationManager implements Runnable {
             System.out.println(ex.getMessage());
             return;
         }
+        int avgS=averageService();
         while (currentTime < timeLimit) {
             removeGeneratedTasks(currentTime,avg);
             updateGui();
@@ -95,13 +96,31 @@ public class SimulationManager implements Runnable {
             currentTime++;
             putThreadToSleep();
         }
-        String printAverage= "Average waiting time: " + max/numberOfClients;
+        String printAverage= "Average waiting time: " + max/getNrClient();
+        String printAverageS= "\nAverage service time: " + avgS/getNrClient();
         writeFile(file,printAverage);
+        writeFile(file,printAverageS);
         closeFile(file);
         setOpenFalse();
     }
-
-
+    public int getNrClient(){
+        int sum=0;
+        if(allClosed()){
+            return numberOfClients;
+        }else{
+            for(int i=0; i<scheduler.getServers().size(); i++){
+               sum+=scheduler.getServers().get(i).getTasks().size();
+            }
+            return sum;
+        }
+    }
+    public int averageService(){
+        int sum=0;
+    for(int i=0; i<generatedTasks.size(); i++){
+        sum+=generatedTasks.get(i).getProcessingTime();
+    }
+    return sum;
+    }
     public boolean allClosed() {
         int j = 0;
         for (int i = 0; i < scheduler.getServers().size(); i++) {
@@ -122,7 +141,7 @@ public class SimulationManager implements Runnable {
                 scheduler.dispatchTask(generatedTasks.get(i));
                  if(max<avg)
                      max=avg;
-                 avg+= scheduler.getAvg();
+                 avg+= scheduler.getServers().get(scheduler.minimWaitingPeriodQueue()).getWaitingPeriod()-currentTime;
                 generatedTasks.remove(i);
             }
     }
